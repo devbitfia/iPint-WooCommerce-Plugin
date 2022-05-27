@@ -2,7 +2,7 @@
 /**
  * iPint Common functions
  *
- * @author   The Tech Makers <info@thetechmakers.com>
+ * @author   iPint <help@ipint.io>
  * @package  WooCommerce Ipint Payments Gateway
  * @since    1.0.0
  */
