@@ -290,17 +290,11 @@ class WC_Ipint_Payments {
 
 	public static function ipint_handle_order_received() {
 
-		register_log("########### Payment return Start #############");
-
 		$page = get_query_var('ipint_page');
 		$order_id = (int) get_query_var('order_id', 0);
 
 		
 		if ($page == 'ipintpayment' && !empty($order_id) && $order_id > 0) {
-
-			// register_log($order_id); 
-			// register_log(print_r($_GET, true)); 
-
 
 			global $woocommerce;
 			$order = new WC_Order( $order_id );
@@ -318,18 +312,12 @@ class WC_Ipint_Payments {
 			// Remove cart
 			$woocommerce->cart->empty_cart();
 
-			// die;
-
 			$redirect_url = $order->get_checkout_order_received_url();
 			wp_safe_redirect($redirect_url);
-			// register_log("########### Payment return End #############");
 
 		} else if ($page == 'ipintcallback' && !empty($order_id) && $order_id > 0) {
 
-			// register_log("########### Callback Request Start #############");
-
 			$post_body = file_get_contents('php://input');
-			register_log( print_r( $post_body, true ) );
 			
 			$post_body = json_decode($post_body);
 
@@ -341,8 +329,6 @@ class WC_Ipint_Payments {
 			$endpoint .= "?id=". get_post_meta($order_id, 'ipint_invoice_id', true);
 
 			$nonce = intval(microtime(true) * 1000000);
-
-
 
 			$api_path = '/invoice?id='. get_post_meta($order_id, 'ipint_invoice_id', true);
 
@@ -364,17 +350,13 @@ class WC_Ipint_Payments {
 				),
 			);
 
-			// register_log( print_r( $post_data, true ) );
-
 			$response = wp_remote_post( $endpoint, $post_data );
 
 			if ( is_wp_error( $response ) ) {
 				$error_message = $response->get_error_message();
-				register_log ("Something went wrong: $error_message");
 			} else {
 
-				$response = json_decode( $response['body'], true );			
-				register_log(print_r($response, true));
+				$response = json_decode( $response['body'], true );
 
 				wc_reduce_stock_levels( $order_id );
 				
@@ -383,7 +365,6 @@ class WC_Ipint_Payments {
 				$order->payment_complete();
 
 			}
-			// register_log("########### Callback Request End #############");
 			die;
 		}
 
@@ -421,24 +402,6 @@ class WC_Ipint_Payments {
 		
 		if($_POST['payment_method'] != 'payment_method')
 			return;
-
-		// if( !isset($_POST['mobile']) || empty($_POST['mobile']) )
-		// 	wc_add_notice( __( 'Please add your mobile number', $this->domain ), 'error' );
-
-		/*$order = wc_get_order( $order_id );
-		$order_data  = $order->get_data(); 
-
-		// Getting minimum amount
-		$min_amount_api_url = $this->get_ipint_api_url().'/limits?preferred_fiat='.$order_data['currency'].'&api_key='.$this->get_ipint_api_key();
-
-		$minimum_amount_response = wp_remote_post( $min_amount_api_url, array(
-			'method'      => 'GET',
-			'timeout'     => 60,
-			'redirection' => 5,
-			'httpversion' => '1.0',
-			'blocking'    => true,			
-			'sslverify'   => false
-		) );*/
 
 	}
 

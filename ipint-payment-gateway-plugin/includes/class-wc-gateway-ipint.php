@@ -38,7 +38,6 @@ class WC_Gateway_Ipint extends WC_Payment_Gateway {
 		$this->method_description = __( 'Allows iPint Payments.', 'ipint' );
 		// Load the settings.
 		$this->form_fields = WC_Gateway_Ipint_Settings::init_form_fields();
-		// $this->form_fields = $ipint_settings->init_form_fields();
 		$this->init_settings();
 		// Define user set variables.
 		$this->title        = $this->get_option( 'title' );
@@ -47,11 +46,6 @@ class WC_Gateway_Ipint extends WC_Payment_Gateway {
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_scheduled_subscription_payment_ipint', array( $this, 'process_subscription_payment' ), 10, 2 );
-		// add_action('template_redirect', array( $this, 'ipint_handle_order_received' ) );
-		// Register new Order status
-		// add_action( 'init', array( $this, 'register_payment_processing_order_status' ));
-		// add_filter( 'wc_order_statuses', array( $this, 'add_payment_processing_to_order_statuses' ));
-		
 	}
 	/**
 	 * Process the payment and return the result.
@@ -61,7 +55,8 @@ class WC_Gateway_Ipint extends WC_Payment_Gateway {
 	 */
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
-		$order_data  = $order->get_data(); 
+		$order_data  = $order->get_data();
+
 		// Getting minimum amount
 		$min_amount_api_url = $this->get_ipint_api_url().'/limits?preferred_fiat='.$order_data['currency'].'&api_key='.$this->get_ipint_api_key();
 		$minimum_amount_response = wp_remote_post( $min_amount_api_url, array(
@@ -117,7 +112,6 @@ class WC_Gateway_Ipint extends WC_Payment_Gateway {
 				} else {
 					$response = json_decode( $response['body'], true );
 					
-					register_log(print_r($response, true));
 					if( $response["error"] == 1 ) {
 						$response['result'] = 'failed';
 						wc_add_notice( __( $response["message"], 'ipint' ), 'error' );
@@ -176,9 +170,7 @@ class WC_Gateway_Ipint extends WC_Payment_Gateway {
 		}
 	}
 	public function ipit_update_order_response_data($order_id, $response_data){
-		// register_log("########### Callback Response #############");
-		// register_log( print_r( $response_data, true ) );
-		
+
 		$ipint_order_fields = [
 			'transaction_status',
 			'transaction_hash',
