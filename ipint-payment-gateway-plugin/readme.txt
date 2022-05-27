@@ -28,8 +28,8 @@ Drop your query to help@ipint.io , we will get back to you in 24 working hours.
 
 == Screenshots ==
 
-1. This screen shot description corresponds to Screenshot_1.png
-2. This screen shot description corresponds to Screenshot_2.png
+1. This screen shot description corresponds to assets/Screenshot_1.png
+2. This screen shot description corresponds to assets/Screenshot_2.png
 
 == Changelog ==
 
