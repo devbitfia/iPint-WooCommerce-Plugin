@@ -1,19 +1,19 @@
 <?php
 /**
- * Plugin Name: iPint for Woocommerce
- * Plugin URI: https://github.com/devbitfia/iPint-WooCommerce-Plugin
- * Description: Adds iPint Crypto Payment Gateway to your WooCommerce website.
+ * Plugin Name: WooCommerce iPint Payments Gateway
+ * Plugin URI: https://ipint.io/
+ * Description: Adds the iPint Payments gateway to your WooCommerce website.
  * Version: 1.0
  *
- * Author: iPint
+ * Author: iPint <help@ipint.io>
  * Author URI: https://ipint.io/
- * License: GPLv2 or later
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ *
  * Text Domain: ipint
  * Domain Path: /i18n/languages/
  *
  * Requires at least: 4.2
  * Tested up to: 4.9
+ *
  */
 
 
@@ -132,7 +132,7 @@ class WC_Ipint_Payments {
 		$order_data = self::get_ipint_meta_fields('admin');
 			
 	    echo '<div class="order_data_column">';
-		echo '<h4> '. _e( "<label>Order Data</label>" ).'</h4>';
+		echo '<h4> <label>'. __( "Order Data", "ipint" ).'</label></h4>';
 
 		foreach( $order_data as $key => $value ){
 
@@ -142,14 +142,15 @@ class WC_Ipint_Payments {
 					$datetime = new DateTime("@$order_timestamp");
 					$order_time = $datetime->format('d-m-Y H:i:s');
 
-					echo '<p class="'.$key.'"><strong>' . __( $value ) . ': </strong>' . $order_time . '</p>';
+					echo '<p class="'.esc_attr($key).'"><strong>' . esc_html__( $value, "ipint" ) . ': </strong>' . esc_html($order_time) . '</p>';
 				} else if( $key == 'ipint_transaction_onclick' ){
 					$transaction_onclick = get_post_meta( $order->get_id(), $key, true );
 					if($transaction_onclick != ''){
-			        	echo '<p><a href="'.$transaction_onclick.'" target="blank">'.$value.'</a></p>';
+			        	echo '<p><a href="'.esc_url($transaction_onclick).'" target="blank">'.esc_html__( $value, "ipint" ).'</a></p>';
 			        }
 				} else{
-					echo '<p class="'.$key.'"><strong>' . __( $value ) . ': </strong>' . get_post_meta( $order->get_id(), $key, true ) . '</p>';
+					$meta_value = get_post_meta( $order->get_id(), $key, true );
+					echo '<p class="'.esc_attr($key).'"><strong>' . esc_html__( $value, "ipint" ) . ': </strong>' . esc_html__($meta_value, "ipint") . '</p>';
 				}
 			}
 		}
@@ -166,16 +167,16 @@ class WC_Ipint_Payments {
 		$order_data = self::get_ipint_meta_fields('frontend');
 
 	    echo '<div class="order_data_table">';
-	    echo '<table><thead><tr><td colspan="2">Payment Details</td></tr></thead><tbody>';
+	    echo '<table><thead><tr><td colspan="2">'.__( 'Payment Details', 'ipint' ).'</td></tr></thead><tbody>';
 
 
 	    foreach( $order_data as $key => $value ){
 	    	if( get_post_meta( $order, $key, true ) != '' ){
 	    		if( $key == 'ipint_transaction_onclick' ){
 	    			$transaction_onclick = get_post_meta( $order, $key, true );
-	    			echo '<tr><td colspan="2"><a href="'.$transaction_onclick.'" target="blank">View on blockchain explorer</a></td></tr>';
+	    			echo '<tr><td colspan="2"><a href="'.esc_url($transaction_onclick).'" target="blank">'. __("View on blockchain explorer", "ipint").'</a></td></tr>';
 	    		}else{
-	    			echo '<tr><td><strong>' . __( $value ) . ': </strong></td><td>'. get_post_meta( $order, $key, true ) .'</td></tr>';
+	    			echo '<tr><td><strong>' . esc_html__( $value, "ipint" ) . ': </strong></td><td>'. esc_html( get_post_meta( $order, $key, true ) ) .'</td></tr>';
 	    		}
 	    	}
 		}
@@ -190,16 +191,16 @@ class WC_Ipint_Payments {
 
 		$order_data = self::get_ipint_meta_fields('frontend');
 	    
-	    echo '<table><thead><tr><td colspan="2">'. __('Payment Details') .'</td></tr></thead><tbody>';
+	    echo '<table><thead><tr><td colspan="2">'. __( 'Payment Details', 'ipint' ) .'</td></tr></thead><tbody>';
 
 	    foreach( $order_data as $key => $value ){
 
 			if( get_post_meta( $order, $key, true ) != '' ){
 				if( $key == 'ipint_transaction_onclick' ){
 	    			$transaction_onclick = get_post_meta( $order, $key, true );
-	    			echo '<tr><td colspan="2"><a href="'.$transaction_onclick.'" target="blank">'. __('View on blockchain explorer') .'</a></td></tr>';
+	    			echo '<tr><td colspan="2"><a href="'.esc_url($transaction_onclick).'" target="blank">'. __('View on blockchain explorer', 'ipint') .'</a></td></tr>';
 	    		}else{
-	    			echo '<tr><td><strong>' . __( $value ) . ': </strong></td><td>'. get_post_meta( $order, $key, true ) .'</td></tr>';
+	    			echo '<tr><td><strong>' . esc_html__( $value, "ipint" ) . ': </strong></td><td>'. esc_html( get_post_meta( $order, $key, true ) ).'</td></tr>';
 	    		}
 			}
 		}
@@ -312,6 +313,8 @@ class WC_Ipint_Payments {
 			// Remove cart
 			$woocommerce->cart->empty_cart();
 
+			// die;
+
 			$redirect_url = $order->get_checkout_order_received_url();
 			wp_safe_redirect($redirect_url);
 
@@ -329,6 +332,8 @@ class WC_Ipint_Payments {
 			$endpoint .= "?id=". get_post_meta($order_id, 'ipint_invoice_id', true);
 
 			$nonce = intval(microtime(true) * 1000000);
+
+
 
 			$api_path = '/invoice?id='. get_post_meta($order_id, 'ipint_invoice_id', true);
 
@@ -402,6 +407,24 @@ class WC_Ipint_Payments {
 		
 		if($_POST['payment_method'] != 'payment_method')
 			return;
+
+		// if( !isset($_POST['mobile']) || empty($_POST['mobile']) )
+		// 	wc_add_notice( __( 'Please add your mobile number', $this->domain ), 'error' );
+
+		/*$order = wc_get_order( $order_id );
+		$order_data  = $order->get_data(); 
+
+		// Getting minimum amount
+		$min_amount_api_url = $this->get_ipint_api_url().'/limits?preferred_fiat='.$order_data['currency'].'&api_key='.$this->get_ipint_api_key();
+
+		$minimum_amount_response = wp_remote_post( $min_amount_api_url, array(
+			'method'      => 'GET',
+			'timeout'     => 60,
+			'redirection' => 5,
+			'httpversion' => '1.0',
+			'blocking'    => true,			
+			'sslverify'   => false
+		) );*/
 
 	}
 
