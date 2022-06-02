@@ -12,7 +12,7 @@
  * Domain Path: /i18n/languages/
  *
  * Requires at least: 4.2
- * Tested up to: 4.9
+ * Tested up to: 6.0
  *
  */
 
