@@ -42,7 +42,6 @@ class WC_Ipint_Payments {
 		// iPint Payments gateway class.
 		add_action( 'plugins_loaded', array( __CLASS__, 'includes' ), 0 );
  
-		add_filter( 'generate_rewrite_rules', array( __CLASS__, 'register_ipint_website_url2' ) );
 		add_filter('query_vars', array( __CLASS__, 'ipint_register_query_vars' ) );
 		add_action('template_redirect', array( __CLASS__, 'ipint_handle_order_received' ) );
 		
@@ -51,8 +50,10 @@ class WC_Ipint_Payments {
 		
 		// to display meta fields in admin order detail page
 		add_action( 'woocommerce_admin_order_data_after_order_details', array( __CLASS__, 'ipint_display_order_data_in_admin' ) );
+
 		// Display order meta fields on order received page
 		add_action('woocommerce_thankyou', array( __CLASS__, 'ipint_display_order_data_in_thankyou_page') );
+
 		// Display order meta fields on mail
 		add_action('woocommerce_email_order_details', array( __CLASS__, 'ipint_mail_order_data'), 200, 4 );
 		
@@ -97,6 +98,7 @@ class WC_Ipint_Payments {
 		$gateways[] = 'WC_Gateway_Ipint';
 		return $gateways;
 	}
+
 	public static function add_payment_processing_to_bulk_actions_shop_order( $actions ) {
 		$new_actions = array();
 	    // Add new custom order status after processing
@@ -238,9 +240,10 @@ class WC_Ipint_Payments {
 			
 			// Remove cart
 			$woocommerce->cart->empty_cart();
-			// die;
+
 			$redirect_url = $order->get_checkout_order_received_url();
 			wp_safe_redirect($redirect_url);
+			exit(0);
 		} else if ($page == 'ipintcallback' && !empty($order_id) && $order_id > 0) {
 			$post_body = file_get_contents('php://input');
 			
