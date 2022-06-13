@@ -1,18 +1,18 @@
 <?php
 /**
  * Plugin Name: WooCommerce iPint Payments Gateway
- * Plugin URI: https://ipint.io/
+ * Plugin URI: https://thetechmakers.com/
  * Description: Adds the iPint Payments gateway to your WooCommerce website.
  * Version: 1.0
  *
- * Author: iPint <help@ipint.io>
- * Author URI: https://ipint.io/
+ * Author: The Tech Makers
+ * Author URI: https://thetechmakers.com/
  *
  * Text Domain: ipint
  * Domain Path: /i18n/languages/
  *
  * Requires at least: 4.2
- * Tested up to: 6.0
+ * Tested up to: 4.9
  *
  */
 
@@ -142,15 +142,15 @@ class WC_Ipint_Payments {
 					$datetime = new DateTime("@$order_timestamp");
 					$order_time = $datetime->format('d-m-Y H:i:s');
 
-					echo '<p class="'.esc_attr($key).'"><strong>' . esc_html__( $value, "ipint" ) . ': </strong>' . esc_html($order_time) . '</p>';
+					echo '<p class="'.esc_attr($key).'"><strong>' . esc_html($value) . ': </strong>' . esc_html($order_time) . '</p>';
 				} else if( $key == 'ipint_transaction_onclick' ){
 					$transaction_onclick = get_post_meta( $order->get_id(), $key, true );
 					if($transaction_onclick != ''){
-			        	echo '<p><a href="'.esc_url($transaction_onclick).'" target="blank">'.esc_html__( $value, "ipint" ).'</a></p>';
+			        	echo '<p><a href="'.esc_url($transaction_onclick).'" target="blank">'.esc_html($value).'</a></p>';
 			        }
 				} else{
 					$meta_value = get_post_meta( $order->get_id(), $key, true );
-					echo '<p class="'.esc_attr($key).'"><strong>' . esc_html__( $value, "ipint" ) . ': </strong>' . esc_html__($meta_value, "ipint") . '</p>';
+					echo '<p class="'.esc_attr($key).'"><strong>' . esc_html($value) . ': </strong>' . esc_html($meta_value) . '</p>';
 				}
 			}
 		}
@@ -176,7 +176,7 @@ class WC_Ipint_Payments {
 	    			$transaction_onclick = get_post_meta( $order, $key, true );
 	    			echo '<tr><td colspan="2"><a href="'.esc_url($transaction_onclick).'" target="blank">'. __("View on blockchain explorer", "ipint").'</a></td></tr>';
 	    		}else{
-	    			echo '<tr><td><strong>' . esc_html__( $value, "ipint" ) . ': </strong></td><td>'. esc_html( get_post_meta( $order, $key, true ) ) .'</td></tr>';
+	    			echo '<tr><td><strong>' . esc_html($value) . ': </strong></td><td>'. esc_html( get_post_meta( $order, $key, true ) ) .'</td></tr>';
 	    		}
 	    	}
 		}
@@ -200,7 +200,7 @@ class WC_Ipint_Payments {
 	    			$transaction_onclick = get_post_meta( $order, $key, true );
 	    			echo '<tr><td colspan="2"><a href="'.esc_url($transaction_onclick).'" target="blank">'. __('View on blockchain explorer', 'ipint') .'</a></td></tr>';
 	    		}else{
-	    			echo '<tr><td><strong>' . esc_html__( $value, "ipint" ) . ': </strong></td><td>'. esc_html( get_post_meta( $order, $key, true ) ).'</td></tr>';
+	    			echo '<tr><td><strong>' . esc_html($value) . ': </strong></td><td>'. esc_html( get_post_meta( $order, $key, true ) ).'</td></tr>';
 	    		}
 			}
 		}
@@ -291,11 +291,17 @@ class WC_Ipint_Payments {
 
 	public static function ipint_handle_order_received() {
 
+		register_log("########### Payment return Start #############");
+
 		$page = get_query_var('ipint_page');
 		$order_id = (int) get_query_var('order_id', 0);
 
 		
 		if ($page == 'ipintpayment' && !empty($order_id) && $order_id > 0) {
+
+			// register_log($order_id); 
+			// register_log(print_r($_GET, true)); 
+
 
 			global $woocommerce;
 			$order = new WC_Order( $order_id );
@@ -317,10 +323,14 @@ class WC_Ipint_Payments {
 
 			$redirect_url = $order->get_checkout_order_received_url();
 			wp_safe_redirect($redirect_url);
+			// register_log("########### Payment return End #############");
 
 		} else if ($page == 'ipintcallback' && !empty($order_id) && $order_id > 0) {
 
+			// register_log("########### Callback Request Start #############");
+
 			$post_body = file_get_contents('php://input');
+			register_log( print_r( $post_body, true ) );
 			
 			$post_body = json_decode($post_body);
 
@@ -355,13 +365,17 @@ class WC_Ipint_Payments {
 				),
 			);
 
+			// register_log( print_r( $post_data, true ) );
+
 			$response = wp_remote_post( $endpoint, $post_data );
 
 			if ( is_wp_error( $response ) ) {
 				$error_message = $response->get_error_message();
+				register_log ("Something went wrong: $error_message");
 			} else {
 
-				$response = json_decode( $response['body'], true );
+				$response = json_decode( $response['body'], true );			
+				register_log(print_r($response, true));
 
 				wc_reduce_stock_levels( $order_id );
 				
@@ -370,6 +384,7 @@ class WC_Ipint_Payments {
 				$order->payment_complete();
 
 			}
+			// register_log("########### Callback Request End #############");
 			die;
 		}
 
