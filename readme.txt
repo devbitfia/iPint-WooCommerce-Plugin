@@ -15,7 +15,6 @@ Version: 1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-
 == Description ==
 
 The iPint Crypto Payment Gateway plugin extends WooCommerce allowing you to take payments in crypto directly on your store or website via iPint's secure APIs with zero coding required to integrate. iPint Payment Gateway is a simple way to accept crypto payments online. With iPint you can accept Bitcoin, ETH, BCH, USDT, DOGE, LTC and many more cryptocurrencies on your platform. iPint is an end to end crypto payment processor handles crypto price fluctuations and freezes price for you so that you receive exact amount without any loss due to volatility as crypto prices changes within minutes. 

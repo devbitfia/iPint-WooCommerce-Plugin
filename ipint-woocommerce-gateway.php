@@ -27,7 +27,6 @@ define( 'IPINT_LIVE_API_URL',  'https://api.ipint.io:8003');
 define( 'IPINT_TEST_API_URL',  'https://api.ipint.io:8002');
 define( 'IPINT_PAYMENT_URL',  'https://ipint.io');
 define( 'IPINT_PROXY_URL',  '');
-
 /**
  * WC iPint Payment gateway plugin class.
  *
@@ -64,7 +63,6 @@ class WC_Ipint_Payments {
 	    // Adding the custom order status to the 3 default woocommerce order statuses
 	    return array( 'wc-payment-processing', 'processing', 'in-progress', 'completed', 'on-hold' );
 	}
-
 	public static function register_payment_processing_order_status() {
 		register_post_status( 'wc-payment-processing', array(
 			'label'                     => _x('Payment Processing', 'ipint'),
