@@ -25,7 +25,7 @@ First, you need to sign up for your merchant account with iPint. Once the sign-u
 
 Merchant API credentials can be created from your iPint account. This account also allows you to add payment details based on the options you want to receive payments.
 
-Check the link for more details: https://github.com/devbitfia/iPint-WooCommerce-Plugin/tree/main/ipint-payment-gateway-plugin
+Check the link for more details: https://ipint.io:8010/docs
 
 
 == Frequently Asked Questions ==
