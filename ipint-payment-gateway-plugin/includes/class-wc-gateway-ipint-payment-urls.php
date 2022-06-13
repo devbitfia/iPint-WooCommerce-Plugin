@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @class    WC_Gateway_Ipint_Settings
  * @version  1.0.1
  */
+
 class WC_Gateway_Ipint_Payment_Urls {
     //add_ac
 
