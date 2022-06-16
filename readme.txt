@@ -2,10 +2,9 @@
 
 Contributors: bitfia
 Donate link: https://ipint.io/donate
-Plugin Name: iPint for Woocommerce
+Plugin Name: iPint Payments Gateway
 Plugin URI: https://github.com/devbitfia/iPint-WooCommerce-Plugin
 Tags: bitcoin, bitcoin cash, dogecoin, litecoin, usdt, eth, iPint for woocommerce, wp, accepts crypto payment, crypto payment gateway, php, iPint
-Author URI: https://ipint.io
 Author: iPint
 Requires PHP: 7.0
 Requires at least: 4.2
