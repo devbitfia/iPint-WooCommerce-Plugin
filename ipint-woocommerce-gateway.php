@@ -1,12 +1,11 @@
 <?php
 /**
- * Plugin Name: WooCommerce iPint Payments Gateway
+ * Plugin Name: iPint Payments Gateway
  * Plugin URI: https://ipint.io/
  * Description: Adds the iPint Payments gateway to your WooCommerce website.
  * Version: 1.0
  *
  * Author: iPint <help@ipint.io>
- * Author URI: https://ipint.io/
  *
  * Text Domain: ipint
  * Domain Path: /i18n/languages/
