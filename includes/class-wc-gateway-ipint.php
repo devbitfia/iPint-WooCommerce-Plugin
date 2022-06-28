@@ -58,7 +58,7 @@ class WC_Gateway_Ipint extends WC_Payment_Gateway {
 		$order_data  = $order->get_data();
 			
 		if( $this->get_option('api_key') == '' || $this->get_option('secret_key') == '' ){
-			wc_add_notice( __( "iPint credentials should not be blank.", 'ipint' ), 'error' );
+			wc_add_notice( __( "iPint API credentials are missing. If you are admin, add from the dashboard, otherwise contact to support team.", 'ipint' ), 'error' );
 			return;
 		}else{
 

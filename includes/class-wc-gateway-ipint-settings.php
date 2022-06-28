@@ -58,7 +58,7 @@ class WC_Gateway_Ipint_Settings {
 				'title'       => __( 'Description', 'ipint' ),
 				'type'        => 'textarea',
 				'description' => __( 'Payment method description that the customer will see on your checkout.', 'ipint' ),
-				'default'     => __( 'Pay from your favorite Crpto Currency.', 'ipint' ),
+				'default'     => __( 'Pay with Cryptocurrency.', 'ipint' ),
 				'desc_tip'    => true,
 			),
 			'mode' => array(
