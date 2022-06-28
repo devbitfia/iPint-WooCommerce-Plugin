@@ -16,9 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Ipint Gateway.
  *
  * @class    WC_Gateway_Ipint_Settings
- * @version  1.0.1
+ * @version  1.0.2
  */
 class WC_Gateway_Ipint_Settings {
+
 	// Return instance of iPints settings class
 	public static function get_instance() {
         if (!isset(self::$obj)) {
@@ -27,10 +28,12 @@ class WC_Gateway_Ipint_Settings {
          
         return self::$obj;
     }
+
 	/**
 	 * Initialise Gateway Settings Form Fields.
 	 */
 	public static function init_form_fields() {
+
 		$form_fields = array(
 			'enabled' => array(
 				'title'   => __( 'Enable/Disable', 'ipint' ),
@@ -84,6 +87,9 @@ class WC_Gateway_Ipint_Settings {
 				'desc_tip'    => true,
 			)
 		);
+
 		return $form_fields;
 	}
+
+
 }

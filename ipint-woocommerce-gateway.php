@@ -3,7 +3,7 @@
  * Plugin Name: iPint Payments Gateway
  * Plugin URI: https://ipint.io/
  * Description: Adds the iPint Payments gateway to your WooCommerce website.
- * Version: 1.0
+ * Version: 1.0.2
  *
  * Author: iPint <help@ipint.io>
  *

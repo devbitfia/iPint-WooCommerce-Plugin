@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Ipint Gateway.
  *
  * @class    WC_Gateway_Ipint
- * @version  1.0.1
+ * @version  1.0.2
  */
 class WC_Gateway_Ipint extends WC_Payment_Gateway {
 	/**
@@ -56,93 +56,99 @@ class WC_Gateway_Ipint extends WC_Payment_Gateway {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 		$order_data  = $order->get_data();
-
-		// Getting minimum amount
-		$min_amount_api_url = $this->get_ipint_api_url().'/limits?preferred_fiat='.$order_data['currency'].'&api_key='.$this->get_ipint_api_key();
-		$minimum_amount_response = wp_remote_post( $min_amount_api_url, array(
-			'method'      => 'GET',
-			'timeout'     => 60,
-			'redirection' => 5,
-			'httpversion' => '1.0',
-			'blocking'    => true,			
-			'sslverify'   => false
-		) );
-		if ( is_wp_error( $minimum_amount_response ) ) {
-			$error_message = $minimum_amount_response->get_error_message();
-			wc_add_notice( __( "Something went wrong: $error_message", 'ipint' ), 'error' );
-			return;
-		} else {
-			$minimum_amount_response = json_decode( $minimum_amount_response['body'], true );
-			$minimum_amount = $minimum_amount_response['minimum_amount'];
-			$maximum_amount = $minimum_amount_response['maximum_amount'];
-			$order_currency = $order_data['currency'];
-			// Now checking if total amount is equal, or greater than minimum amount, or not
 			
-			if( $order_data['total'] >= $minimum_amount && $order_data['total'] <= $maximum_amount ){ 
-				$admin_note = sanitize_text_field( $_POST[ $this->id.'-admin-note']);
-				if( isset( $admin_note ) && trim($admin_note) != ''){
-					$order->add_order_note( sanitize_text_field( $admin_note ), 1 );
-				}
-				$post_data = array(
-					'client_email_id'                => $order_data['billing']['email'],
-					'client_preferred_fiat_currency' => $order_data['currency'],
-					'amount'                         => $order_data['total'],
-					'merchant_website'               => $this->get_redirect_url($order_id),
-					'invoice_callback_url'           => $this->get_callback_url($order_id)
-				);
-				$post_data = json_encode($post_data);
-				$response = wp_remote_post( $this->get_ipint_payment_url(), array(
-					'method'      => 'POST',
-					'timeout'     => 60,
-					'redirection' => 5,
-					'httpversion' => '1.0',
-					'blocking'    => true,			
-					'sslverify'   => false,
-					'headers'     => array(
-						'Content-Type' => 'application/json',
-						'apikey' => $this->get_ipint_api_key(),
-					),
-					'body'        => $post_data,
-					'data_format' => 'body',
-				) );
-				if ( is_wp_error( $response ) ) {
-					$error_message = $response->get_error_message();
-					wc_add_notice( __( "Something went wrong: $error_message", 'ipint' ), 'error' );
-					return;
-				} else {
-					$response = json_decode( $response['body'], true );
-					
-					if( $response["error"] == 1 ) {
-						$response['result'] = 'failed';
-						wc_add_notice( __( $response["message"], 'ipint' ), 'error' );
-						return;
-					} else{ 
-						$redirect_url = $this->get_ipint_redirect_url( $response["session_id"] );
-						
-						$response['redirect'] = $redirect_url;
-						$response['result'] = 'success';
-					}
-					return $response;
-					
-				}
-			} else if( $order_data['total'] >= $maximum_amount ) {
-				
-				$checkout_page_id = wc_get_page_id( 'checkout' );
-				$checkout_page_url = $checkout_page_id ? get_permalink( $checkout_page_id ) : '';
-				$response['redirect'] = $checkout_page_url;
-				$response['result'] = 'failed';
-				wc_add_notice( __( 'Total amount should be equal or less than '.$maximum_amount.' '.$order_currency, 'ipint' ), 'error' );
+		if( $this->get_option('api_key') == '' || $this->get_option('secret_key') == '' ){
+			wc_add_notice( __( "iPint credentials should not be blank.", 'ipint' ), 'error' );
+			return;
+		}else{
+
+			// Getting minimum amount
+			$min_amount_api_url = $this->get_ipint_api_url().'/limits?preferred_fiat='.$order_data['currency'].'&api_key='.$this->get_ipint_api_key();
+			$minimum_amount_response = wp_remote_post( $min_amount_api_url, array(
+				'method'      => 'GET',
+				'timeout'     => 60,
+				'redirection' => 5,
+				'httpversion' => '1.0',
+				'blocking'    => true,			
+				'sslverify'   => false
+			) );
+			if ( is_wp_error( $minimum_amount_response ) ) {
+				$error_message = $minimum_amount_response->get_error_message();
+				wc_add_notice( __( "Something went wrong: $error_message", 'ipint' ), 'error' );
 				return;
 			} else {
+				$minimum_amount_response = json_decode( $minimum_amount_response['body'], true );
+				$minimum_amount = $minimum_amount_response['minimum_amount'];
+				$maximum_amount = $minimum_amount_response['maximum_amount'];
+				$order_currency = $order_data['currency'];
+				// Now checking if total amount is equal, or greater than minimum amount, or not
 				
-				$checkout_page_id = wc_get_page_id( 'checkout' );
-				$checkout_page_url = $checkout_page_id ? get_permalink( $checkout_page_id ) : '';
-				$response['redirect'] = $checkout_page_url;
-				$response['result'] = 'failed';
-				wc_add_notice( __( 'Total amount should be equal or greater than '.$minimum_amount.' '.$order_currency, 'ipint' ), 'error' );
-				return;
+				if( $order_data['total'] >= $minimum_amount && $order_data['total'] <= $maximum_amount ){ 
+					$admin_note = sanitize_text_field( $_POST[ $this->id.'-admin-note']);
+					if( isset( $admin_note ) && trim($admin_note) != ''){
+						$order->add_order_note( sanitize_text_field( $admin_note ), 1 );
+					}
+					$post_data = array(
+						'client_email_id'                => $order_data['billing']['email'],
+						'client_preferred_fiat_currency' => $order_data['currency'],
+						'amount'                         => $order_data['total'],
+						'merchant_website'               => $this->get_redirect_url($order_id),
+						'invoice_callback_url'           => $this->get_callback_url($order_id)
+					);
+					$post_data = json_encode($post_data);
+					$response = wp_remote_post( $this->get_ipint_payment_url(), array(
+						'method'      => 'POST',
+						'timeout'     => 60,
+						'redirection' => 5,
+						'httpversion' => '1.0',
+						'blocking'    => true,			
+						'sslverify'   => false,
+						'headers'     => array(
+							'Content-Type' => 'application/json',
+							'apikey' => $this->get_ipint_api_key(),
+						),
+						'body'        => $post_data,
+						'data_format' => 'body',
+					) );
+					if ( is_wp_error( $response ) ) {
+						$error_message = $response->get_error_message();
+						wc_add_notice( __( "Something went wrong: $error_message", 'ipint' ), 'error' );
+						return;
+					} else {
+						$response = json_decode( $response['body'], true );
+						
+						if( $response["error"] == 1 ) {
+							$response['result'] = 'failed';
+							wc_add_notice( __( $response["message"], 'ipint' ), 'error' );
+							return;
+						} else{ 
+							$redirect_url = $this->get_ipint_redirect_url( $response["session_id"] );
+							
+							$response['redirect'] = $redirect_url;
+							$response['result'] = 'success';
+						}
+						return $response;
+						
+					}
+				} else if( $order_data['total'] >= $maximum_amount ) {
+					
+					$checkout_page_id = wc_get_page_id( 'checkout' );
+					$checkout_page_url = $checkout_page_id ? get_permalink( $checkout_page_id ) : '';
+					$response['redirect'] = $checkout_page_url;
+					$response['result'] = 'failed';
+					wc_add_notice( __( 'Total amount should be equal or less than '.$maximum_amount.' '.$order_currency, 'ipint' ), 'error' );
+					return;
+				} else {
+					
+					$checkout_page_id = wc_get_page_id( 'checkout' );
+					$checkout_page_url = $checkout_page_id ? get_permalink( $checkout_page_id ) : '';
+					$response['redirect'] = $checkout_page_url;
+					$response['result'] = 'failed';
+					wc_add_notice( __( 'Total amount should be equal or greater than '.$minimum_amount.' '.$order_currency, 'ipint' ), 'error' );
+					return;
+				}
 			}
-		}	
+		}
 	}
 	public function ipit_update_order_data($order_id){
 		$ipint_order_fields = [

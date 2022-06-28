@@ -10,7 +10,7 @@ Requires PHP: 7.0
 Requires at least: 4.2
 Tested up to: 6.0
 Stable tag: 1.0
-Version: 1.0 
+Version: 1.0.2 
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -39,13 +39,15 @@ Drop your query to help@ipint.io , we will get back to you in 24 working hours.
 
 == Changelog ==
 
-= 1.0 =
+= 1.0.1 =
 * Fresh version of plugin.
+
+= 1.0.2 =
+* Fixed bug that was showing same error everytime.
 
 == Upgrade Notice ==
 
-= 1.0 =
+= 1.0.2 =
 No upgradation for now.
-
 
 `<?php code(); ?>`
